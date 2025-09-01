@@ -1,0 +1,40 @@
+#!/bin/bash
+# Installer script
+
+set -e
+
+# Check dependencies
+echo "Checking dependencies..."
+for dep in g++ cmake gocryptfs; do
+    if ! command -v $dep &>/dev/null; then
+        echo "Error: $dep is not installed. Please install it first."
+        exit 1
+    fi
+done
+
+# Build the project
+echo "Building the project..."
+mkdir -p build
+cd build
+cmake ..
+make
+
+# Install the binary system-wide
+echo "Installing vault..."
+sudo cp vault /usr/local/bin/
+sudo chmod 755 /usr/local/bin/vault
+
+# Setup encrypted vault folder
+VAULT_DIR="$HOME/vault.crypt"
+MOUNT_DIR="$HOME/vault"
+
+mkdir -p "$VAULT_DIR" "$MOUNT_DIR"
+
+if [ ! -f "$VAULT_DIR/gocryptfs.conf" ]; then
+    echo "Initializing encrypted vault..."
+    gocryptfs -init "$VAULT_DIR"
+    gocryptfs "$VAULT_DIR" "$MOUNT_DIR"
+fi
+
+echo "Installation complete!"
+echo "Run 'vault' to start managing your passwords."

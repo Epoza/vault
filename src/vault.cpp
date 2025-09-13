@@ -179,16 +179,12 @@ std::vector<std::filesystem::directory_entry> getEntries(const std::string_view 
   return entries;
 }
 
-// view files contained in vault directory
-void viewEntries(const std::string_view vaultMount)
+int chooseEntry(const std::vector<std::filesystem::directory_entry> &entries, const std::string &actionName)
 {
-  // vector that contains all entries
-  std::vector entries{getEntries(vaultMount)};
-
   if (entries.empty())
   {
     std::cout << "No entries found in vault.\n";
-    return;
+    return -1;
   }
 
   // print numbered list
@@ -201,30 +197,44 @@ void viewEntries(const std::string_view vaultMount)
 
   // get user choice
   int choice;
-  std::cout << "Enter the number of the entry to view: ";
+  std::cout << "Enter the number of the entry to " + actionName + ": ";
   std::cin >> choice;
   std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
   if (choice == 0)
   {
-    std::cout << "Exiting view.\n";
-    return;
+    return -1;
   }
   if (choice < 1 || choice > (int)entries.size())
   {
     std::cerr << "Invalid choice.\n";
+    return -1;
+  }
+
+  return choice - 1;
+}
+
+// view files contained in vault directory
+void viewEntries(const std::string_view vaultMount)
+{
+  // vector that contains all entries
+  std::vector entries{getEntries(vaultMount)};
+  int id = chooseEntry(entries, "view");
+  if (id < 0)
+  {
+    std::cout << "Exiting.\n";
     return;
   }
 
   // open chosen file
-  std::ifstream file(entries[choice - 1].path());
+  std::ifstream file(entries[id].path());
   if (!file)
   {
     std::cerr << "Error opening file.\n";
     return;
   }
 
-  std::cout << "\n=== Content of " << entries[choice - 1].path().filename().string() << " ===\n";
+  std::cout << "\n=== Content of " << entries[id].path().filename().string() << " ===\n";
   std::string line;
   while (std::getline(file, line))
   {
@@ -237,40 +247,14 @@ bool editEntry(const std::string_view &vaultMount)
 {
   // vector that contains all entries
   std::vector entries{getEntries(vaultMount)};
-
-  if (entries.empty())
+  int id = chooseEntry(entries, "edit");
+  if (id < 0)
   {
-    std::cout << "No entries found in vault.\n";
-    return false;
-  }
-
-  // print numbered list
-  std::cout << "\n=== Entries in vault ===\n";
-  for (size_t i = 0; i < entries.size(); ++i)
-  {
-    std::cout << i + 1 << ") " << entries[i].path().filename().string() << "\n";
-  }
-  std::cout << "0) Exit\n";
-
-  // get user choice
-  int choice;
-  std::cout << "Enter the number of the entry to edit: ";
-  std::cin >> choice;
-  std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-  if (choice == 0)
-  {
-    std::cout << "Exiting view.\n";
-    return true;
-  }
-  if (choice < 1 || choice > (int)entries.size())
-  {
-    std::cerr << "Invalid choice.\n";
     return false;
   }
 
   // open chosen file
-  std::ifstream file(entries[choice - 1].path());
+  std::ifstream file(entries[id].path());
   if (!file)
   {
     std::cerr << "Error opening file.\n";
@@ -278,7 +262,7 @@ bool editEntry(const std::string_view &vaultMount)
   }
 
   // edit chosen file
-  const std::filesystem::path &filePath = entries[choice - 1].path();
+  const std::filesystem::path &filePath = entries[id].path();
 
   Entry e;
   std::getline(file, e.service);
@@ -349,40 +333,14 @@ bool removeEntry(const std::string_view &vaultMount)
 {
   // vector that contains all entries
   std::vector entries{getEntries(vaultMount)};
-
-  if (entries.empty())
+  int id = chooseEntry(entries, "remove");
+  if (id < 0)
   {
-    std::cout << "No entries found in vault.\n";
-    return false;
-  }
-
-  // print numbered list
-  std::cout << "\n=== Entries in vault ===\n";
-  for (size_t i = 0; i < entries.size(); ++i)
-  {
-    std::cout << i + 1 << ") " << entries[i].path().filename().string() << "\n";
-  }
-  std::cout << "0) Exit\n";
-
-  // get user choice
-  int choice;
-  std::cout << "Enter the number of the entry to remove: ";
-  std::cin >> choice;
-  std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-  if (choice == 0)
-  {
-    std::cout << "Exiting view.\n";
-    return true;
-  }
-  if (choice < 1 || choice > (int)entries.size())
-  {
-    std::cerr << "Invalid choice.\n";
     return false;
   }
 
   // open chosen file
-  std::ifstream file(entries[choice - 1].path());
+  std::ifstream file(entries[id].path());
   if (!file)
   {
     std::cerr << "Error opening file.\n";
@@ -390,7 +348,7 @@ bool removeEntry(const std::string_view &vaultMount)
   }
 
   // remove chosen file
-  const std::filesystem::path &filePath = entries[choice - 1].path();
+  const std::filesystem::path &filePath = entries[id].path();
   try
   {
     if (std::filesystem::remove(filePath))
@@ -452,7 +410,7 @@ int main()
               << "4) Remove entry\n"
               << "5) Change password\n"
               << "0) Exit\n"
-              << "Select an option: ";
+              << "\nSelect an option: ";
 
     if (!(std::cin >> choice))
     {

@@ -426,8 +426,7 @@ int main()
     case 1:
       if (!addEntry(vaultMount))
       {
-        std::cerr << "Failed to create file. Exiting.\n";
-        return 1;
+        std::cerr << "Failed to create file\n";
       }
       break;
     case 2:
@@ -436,14 +435,14 @@ int main()
     case 3:
       if (!editEntry(vaultMount))
       {
-        std::cerr << "Failed to edit file. Exiting.\n";
+        std::cerr << "Failed to edit file\n";
         return 1;
       }
       break;
     case 4:
       if (!removeEntry(vaultMount))
       {
-        std::cerr << "Failed to remove file. Exiting.\n";
+        std::cerr << "Failed to remove file\n";
         return 1;
       }
       break;

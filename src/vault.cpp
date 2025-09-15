@@ -382,7 +382,7 @@ int main()
   // encrypted (where the encrypted files are stored)
   std::string vaultCrypt{home + "/.vault.crypt"};
   // plain (where the files are in plaintext)
-  std::string vaultMount{home + "/vault"};
+  std::string vaultMount{home + "/vault-plain"};
 
   // check that the folders exist
   if (!ensureDirectoryExists(vaultCrypt) || !ensureDirectoryExists(vaultMount))

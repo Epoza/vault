@@ -33,7 +33,7 @@ $SUDO chmod 755 /usr/local/bin/vault
 
 # Setup encrypted vault folder
 ENCRYPTED_DIR="$HOME/.vault.crypt"
-MOUNT_DIR="$HOME/vault"
+MOUNT_DIR="$HOME/vault-plain"
 
 mkdir -p "$ENCRYPTED_DIR" "$MOUNT_DIR"
 

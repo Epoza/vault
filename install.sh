@@ -3,6 +3,13 @@
 
 set -e
 
+# If running as root, no need for sudo
+if [ "$(id -u)" -eq 0 ]; then
+    SUDO=""
+else
+    SUDO="sudo"
+fi
+
 # Check dependencies
 echo "Checking dependencies..."
 for dep in g++ cmake gocryptfs; do
@@ -21,8 +28,8 @@ make
 
 # Install the binary system-wide
 echo "Installing vault..."
-sudo cp vault /usr/local/bin/
-sudo chmod 755 /usr/local/bin/vault
+$SUDO cp vault /usr/local/bin/
+$SUDO chmod 755 /usr/local/bin/vault
 
 # Setup encrypted vault folder
 ENCRYPTED_DIR="$HOME/.vault.crypt"
